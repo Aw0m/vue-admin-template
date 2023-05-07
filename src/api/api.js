@@ -3,13 +3,10 @@ import axios from "axios";
 
 export function request(config) {
     const instance = axios.create({
-        baseURL: 'http://127.0.0.1:8080',
+        baseURL: 'http://localhost:8080',
         timeout: 15000,
         headers: {
-            'Authorization':  window.localStorage.getItem('token'),
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Origin, Content-Type, X-Auth-Token"
+            'Authorization':  '123',
         }
     })
 

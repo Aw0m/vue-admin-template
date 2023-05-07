@@ -5,9 +5,9 @@
             <el-button type="primary" @click="dialogFormVisible = true">修改订单信息</el-button>
 
             <el-dialog title="查询订单" :visible.sync="dialogFormVisible">
-                <el-form :model="form">
+                <el-form :model="orderID">
                     <el-form-item label="输入订单ID" :label-width="formLabelWidth">
-                        <el-input v-model="form.name" autocomplete="off"></el-input>
+                        <el-input v-model="orderID" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-form>
                 <div slot="footer" class="dialog-footer">
@@ -81,8 +81,19 @@
                 </div>
             </el-dialog>
             <br><br>
-            <Table max-height="6700" border stripe :columns="categoryColumns" :data="categoryData"></Table>
+            <Table max-height="6700" border stripe :columns="orderColumns" :data="orderData"></Table>
             <br>
+        </div>
+        <div>
+            <el-pagination
+                background
+                layout="prev, pager, next"
+                :page-size="5"
+                :pager-count="15"
+                :current-page="currPage"
+                @current-change="currentPageChange"
+                :total="totalOrderNum">
+            </el-pagination>
         </div>
     </div>
 </template>
@@ -92,49 +103,65 @@
 
 <script>
 
+import { getAllOrder, getOrderCount, getOrderDetail, updateOrder } from '@/api/order'
+
 export default {
     name: 'order',
     methods: {
-        updateOrder() {
+        async updateOrder() {
+            let rsp = await updateOrder(this.currOrder);
+            if (rsp.message !== 'success') {
+                alert("更新order信息失败");
+                return;
+            } else {
+                console.log(rsp)
+            }
+
+            await this.currentPageChange(this.currPage);
             this.currOderVisible = false
-            alert("update order")
         },
-        getOrderInfo() {
-            this.dialogFormVisible = false
-            //TODO 改为拉取实际的数据
-            this.currOrder = {
-                order_id: "414371682910277",
-                seller_id: "1",
-                seller_name: "深月手信",
-                commodity_id: "13",
-                commodity_name: "测试商品-11",
-                commodity_image_url: "https://cdn-we-retail.ym.tencent.com/tsr/goods/dz-3a.png",
-                customer_id: "1",
-                deliveryman_name: "",
-                deliveryman_phone_num: "",
-                phone_num: "15225682568",
-                consignee_name: "Awom",
-                address_id: 408318283305029,
-                address_detail_info: "重庆市沙坪坝区重庆大学虎溪校区竹园",
-                price: 10,
-                quantity: 1,
-                status: 1,
-                create_time: "2023-05-05T23:42:43+08:00",
-                update_time: "2023-05-05T23:42:43+08:00",
-                is_deleted: false
-            };
+        async getOrderInfo() {
+            const rsp = await getOrderDetail(this.orderID);
+            if (rsp.message !== 'success') {
+                alert("get order fail! err msg:", rsp.message);
+                return;
+            }
+            this.dialogFormVisible = false;
+            this.currOrder = rsp.rsp.order;
             this.currOderVisible = true;
-        }
+        },
+        async currentPageChange(val) {
+            this.currPage = val;
+            const rsp = await getAllOrder(val, 5, [1, 2, 3, 4])
+            if (rsp.message !== 'success') {
+                alert("拉取order信息失败");
+                return;
+            }
+            this.orderData = rsp.rsp.order_list;
+        },
+        async getTotalOrderCount() {
+            const rsp = await getOrderCount([1, 2, 3, 4])
+            if (rsp.message !== "success") {
+                alert("拉取order count信息失败");
+                return;
+            }
+            console.log(rsp.rsp)
+            this.totalOrderNum = Number(rsp.rsp.order_count);
+        },
     },
     created() {
+        this.getTotalOrderCount();{}
         this.currOrder = {};
+        this.currentPageChange(1);
     },
     data() {
         return {
+            currPage: 1,
             currOrder:{},
+            totalOrderNum: 0,
             dialogFormVisible: false,
             currOderVisible: false,
-            categoryColumns: [
+            orderColumns: [
                 {
                     title: '订单ID',
                     key: 'order_id',
@@ -208,7 +235,7 @@ export default {
                     key: 'is_deleted',
                 },
             ],
-            categoryData: [
+            orderData: [
                 {
                     order_id: "414371682910277",
                     seller_id: "1",
@@ -231,16 +258,7 @@ export default {
                     is_deleted: false
                 },
             ],
-            form: {
-                name: '',
-                region: '',
-                date1: '',
-                date2: '',
-                delivery: false,
-                type: [],
-                resource: '',
-                desc: ''
-            },
+            orderID: '',
             formLabelWidth: '120px'
         }
     }

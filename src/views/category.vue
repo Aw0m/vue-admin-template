@@ -7,11 +7,10 @@
 <!--            </div>-->
             <br>
             <el-button type="primary" @click="dialogTableVisible = true">添加category</el-button>
-
             <el-dialog title="添加分类" :visible.sync="dialogTableVisible">
-                <el-form :model="form">
+                <el-form :model="newCategoryName">
                     <el-form-item label="新建分类名称" :label-width="formLabelWidth">
-                        <el-input v-model="form.name" autocomplete="off"></el-input>
+                        <el-input v-model="newCategoryName" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-form>
                 <div slot="footer" class="dialog-footer">
@@ -23,9 +22,9 @@
             <el-button type="info" @click="dialogFormVisible = true">删除category</el-button>
 
             <el-dialog title="删除分类" :visible.sync="dialogFormVisible">
-                <el-form :model="form">
+                <el-form :model="deleteCategoryID">
                     <el-form-item label="删除的分类的id" :label-width="formLabelWidth">
-                        <el-input v-model="form.name" autocomplete="off"></el-input>
+                        <el-input v-model="deleteCategoryID" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-form>
                 <div slot="footer" class="dialog-footer">
@@ -41,18 +40,41 @@
 </template>
 
 <script>
-import { getCategoryList } from '@/api/category'
+import { addCategory, deleteCategory, getCategoryList } from '@/api/category'
 
 export default {
     name: 'category',
     methods: {
-        addCategory() {
+        async addCategory() {
+            let rsp = await addCategory({category_name: this.newCategoryName})
+            if (rsp.message !== 'success') {
+                alert(`add Category fail! ERROR:${rsp.message}`);
+                return
+            }
             this.dialogTableVisible = false;
-            alert("add Category success!");
+
+            // 重新拉取最新的分类信息
+            rsp = await getCategoryList();
+            if (rsp.message === 'success') {
+                this.categoryData = rsp.rsp.category_list;
+            } else {
+                console.log('getCategoryInfo fail, rsp:', rsp);
+            }
         },
-        deleteCategory() {
+        async deleteCategory() {
+            let rsp = await deleteCategory(this.deleteCategoryID)
+            if (rsp.message !== 'success') {
+                alert(`delete Category fail! ERROR:${rsp.message}`);
+                return;
+            }
             this.dialogFormVisible = false;
-            alert("delete category success")
+            // 重新拉取最新的分类信息
+            rsp = await getCategoryList();
+            if (rsp.message === 'success') {
+                this.categoryData = rsp.rsp.category_list;
+            } else {
+                console.log('getCategoryInfo fail, rsp:', rsp);
+            }
         },
         async getCategoryInfo() {
             const rsp = await getCategoryList();
@@ -82,17 +104,8 @@ export default {
             categoryData: [],
             dialogTableVisible: false,
             dialogFormVisible: false,
-
-            form: {
-                name: '',
-                region: '',
-                date1: '',
-                date2: '',
-                delivery: false,
-                type: [],
-                resource: '',
-                desc: ''
-            },
+            newCategoryName: '',
+            deleteCategoryID: '',
             formLabelWidth: '120px'
         }
     },
