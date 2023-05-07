@@ -6,16 +6,16 @@
 <!--                <Input search placeholder="请输入查123询内容" style="width: auto" />-->
 <!--            </div>-->
             <br>
-            <el-button type="primary" @click="dialogFormVisible = true">添加category</el-button>
+            <el-button type="primary" @click="dialogTableVisible = true">添加category</el-button>
 
-            <el-dialog title="添加分类" :visible.sync="dialogFormVisible">
+            <el-dialog title="添加分类" :visible.sync="dialogTableVisible">
                 <el-form :model="form">
                     <el-form-item label="新建分类名称" :label-width="formLabelWidth">
                         <el-input v-model="form.name" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-form>
                 <div slot="footer" class="dialog-footer">
-                    <el-button @click="dialogFormVisible = false">取 消</el-button>
+                    <el-button @click="dialogTableVisible = false">取 消</el-button>
                     <el-button type="primary" @click="addCategory">确 定</el-button>
                 </div>
             </el-dialog>
@@ -47,7 +47,7 @@ export default {
     name: 'category',
     methods: {
         addCategory() {
-            this.dialogFormVisible = false;
+            this.dialogTableVisible = false;
             alert("add Category success!");
         },
         deleteCategory() {
