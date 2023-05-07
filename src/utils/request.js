@@ -23,13 +23,13 @@ service.interceptors.response.use(response => {
     const res = response.data
     // 这里是接口处理的一个示范，可以根据自己的项目需求更改
     // 错误处理
-    if (res.code != 0 && res.msg) {
+    if (res.code !== 0 && res.msg) {
         Message.error({
             content: res.msg,
         })
 
         // token 无效，清空路由，退出登录
-        if (res.code == 2) {
+        if (res.code === 2) {
             resetTokenAndClearUser()
             router.push('login')
         }
@@ -41,7 +41,7 @@ service.interceptors.response.use(response => {
     return res
 }, (error) => {
     closeLoading()
-    if (error.name == 'Error') {
+    if (error.name === 'Error') {
         Message.error({
             content: error.msg,
         })

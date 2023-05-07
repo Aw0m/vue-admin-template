@@ -1,15 +1,9 @@
 module.exports = {
     devServer: {
-        proxy: {
-            '/api': {
-                target: 'http://xxxx/device/', // 对应自己的接口
-                changeOrigin: true,
-                ws: true,
-                pathRewrite: {
-                    '^/api': '',
-                },
-            },
-        },
+        hot: true,
+        port: 8001,
+        host: "0.0.0.0",
+        proxy: 'https://localhost:8888'
     },
     publicPath: './',
 }
